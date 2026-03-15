@@ -7,5 +7,12 @@ namespace Marketify.Entites
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string? Address { get; set; }
+        public string?   storeName { get; set; }
+
+        public string?   storeDescriptions { get; set; }
+        public ICollection<Product>? OwnProducts { get; set; }
+
+
+
     }
 }

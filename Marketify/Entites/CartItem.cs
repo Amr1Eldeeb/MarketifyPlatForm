@@ -9,5 +9,6 @@
 
         public int CartId { get; set; }
         public Cart? Cart { get; set; }
+        public string SelectedSize { get; set; } = string.Empty;
     }
 }

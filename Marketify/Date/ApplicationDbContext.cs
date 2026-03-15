@@ -1,6 +1,8 @@
 ﻿using Marketify.Entites;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
+using System.Reflection.Emit;
 
 namespace Marketify.Date
 {
@@ -27,23 +29,9 @@ namespace Marketify.Date
 protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+            builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
-            builder.Entity<ProductSize>()
-                .HasKey(ps => new { ps.ProductId, ps.SizeId });
-
-            builder.Entity<ProductSize>()
-                .HasOne(ps => ps.Product)
-                .WithMany(p => p.ProductSizes)
-                .HasForeignKey(ps => ps.ProductId);
-
-            builder.Entity<ProductSize>()
-                .HasOne(ps => ps.Size)
-                .WithMany()
-                .HasForeignKey(ps => ps.SizeId);
-
-            builder.Entity<Product>().Property(p => p.Price).HasColumnType("decimal(18,2)");
-            builder.Entity<Order>().Property(o => o.TotalAmount).HasColumnType("decimal(18,2)");
-            builder.Entity<OrderItem>().Property(oi => oi.PriceAtPurchase).HasColumnType("decimal(18,2)");
+           
         }
 
     } 
