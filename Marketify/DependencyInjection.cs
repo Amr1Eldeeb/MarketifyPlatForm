@@ -1,5 +1,6 @@
 ﻿using Marketify.Date;
 using Marketify.Entites;
+using Marketify.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +18,8 @@ namespace Marketify
             .AllowAnyMethod()
             
             ));
+            services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<ICategoryService, CategoryService>();
             services.AddControllers();
             services.AddAuthorazationsConfig(configuration);
             var connencationString = configuration.GetConnectionString("DefaultConnection")

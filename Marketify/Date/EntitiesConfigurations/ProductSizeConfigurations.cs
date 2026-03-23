@@ -14,6 +14,7 @@ namespace Marketify.Date.EntitiesConfigurations
             builder.HasOne(ps => ps.Size)
                 .WithMany()
                 .HasForeignKey(ps => ps.SizeId);
+
         }
     }
 }

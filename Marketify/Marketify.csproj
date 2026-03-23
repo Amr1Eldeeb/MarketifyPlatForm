@@ -7,6 +7,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Mapster" Version="9.0.0-pre01" />
+		<PackageReference Include="Mapster.DependencyInjection" Version="9.0.0-pre01" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
 
@@ -24,7 +26,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Controllers\" />
+		<Folder Include="Contracts\Cart\" />
+		<Folder Include="Contracts\CartItem\" />
+		<Folder Include="Contracts\OrderItem\" />
+		<Folder Include="Contracts\Order\" />
+		<Folder Include="Contracts\Review\" />
+		<Folder Include="wwwroot\images\" />
 	</ItemGroup>
 
 </Project>

@@ -12,11 +12,11 @@
         public int CategoryId { get; set; }
         public Category? Category { get; set; } 
 
-        public string? VendorId { get; set; }
-        public ApplicationUser? Vendor { get; set; }
+        //public string? VendorId { get; set; }
+        //public ApplicationUser? Vendor { get; set; }
 
         public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
         public ICollection<ProductSize> ProductSizes { get; set; } = new List<ProductSize>();
-        public ICollection<Review> Reviews { get; set; } = new List<Review>();
+        public ICollection<Review>? Reviews { get; set; } = new List<Review>();
     }
 }
