@@ -1,4 +1,6 @@
 using Marketify;
+using Marketify.Date;
+using Marketify.Entites;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDependences(builder.Configuration);
@@ -11,6 +13,9 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader();
     });
 });
+
+//builder.Services
+//    .AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkStores<ApplicationDbContext>();
 var app = builder.Build();
 app.UseCors("AllowAll");
 app.UseStaticFiles();
@@ -27,7 +32,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseAuthorization();
+//app.MapIdentityApi<ApplicationUser>();
 app.MapControllers();
 
 app.Run();

@@ -1,0 +1,9 @@
+﻿using Marketify.Entites;
+
+namespace Marketify.Authentication
+{
+    public interface IJwtProvider
+    {
+        (string token , int expiresIn)GenerateToken(ApplicationUser user);
+    }
+}

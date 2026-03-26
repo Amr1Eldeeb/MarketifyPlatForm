@@ -4,6 +4,7 @@ using Marketify.Date;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Marketify.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260323100736_AddSoftDeleteToCategory")]
+    partial class AddSoftDeleteToCategory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,13 +49,11 @@ namespace Marketify.Migrations
 
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasMaxLength(70)
-                        .HasColumnType("nvarchar(70)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LastName")
                         .IsRequired()
-                        .HasMaxLength(70)
-                        .HasColumnType("nvarchar(70)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -88,12 +89,10 @@ namespace Marketify.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("storeDescriptions")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("storeName")
-                        .HasMaxLength(60)
-                        .HasColumnType("nvarchar(60)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -106,26 +105,6 @@ namespace Marketify.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "b74ddd14-6340-4840-95c2-db12554843e5",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "7e3a858a-b58d-49c8-96e4-16d148067f7d",
-                            Email = "test@user.com",
-                            EmailConfirmed = true,
-                            FirstName = "Ahmed",
-                            LastName = "Ali",
-                            LockoutEnabled = false,
-                            NormalizedEmail = "TEST@USER.COM",
-                            NormalizedUserName = "TEST@USER.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEFnPgIm1S4BilwaH+lcNkAYkOJj6GT8zvtsOC2oEgOTeQGNMBcs0aaLVtgE5gsWjqw==",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "f92a5f1d-3237-46d9-8933-174943754768",
-                            TwoFactorEnabled = false,
-                            UserName = "test@user.com"
-                        });
                 });
 
             modelBuilder.Entity("Marketify.Entites.Cart", b =>

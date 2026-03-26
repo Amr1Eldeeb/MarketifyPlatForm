@@ -30,6 +30,27 @@ namespace Marketify.Controllers
             if (result) return Ok(result);
             return BadRequest();
         }
-    
+        [HttpDelete("{Id}")]
+        public async Task<IActionResult>SoftDeleteCategory([FromRoute]int Id)
+        {
+            var result = await _categoryService.SoftDelete(Id);
+            if(result) return Ok(result);
+            return BadRequest();
+        }
+        [HttpGet("{Id}")]
+        public async Task<IActionResult> GetCategoryById([FromRoute] int Id)
+        {
+            var response = await _categoryService.GetCategoryById(Id);
+            return Ok(response);
+        }
+        [HttpGet]
+        public async Task<IActionResult>GetAllCategoryes()
+        {
+            var result =await _categoryService.GetAllCategories();
+            return Ok(result);
+        }
+
+
+
     }
 }
