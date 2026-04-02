@@ -10,6 +10,8 @@ namespace Marketify.Contracts.Authenthication
         string LastName,
         string Token,
         int ExpiresIn 
+        //string RefreshToken,
+        //DateTime RefreshTokenExpiration
         
         
         );

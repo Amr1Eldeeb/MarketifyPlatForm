@@ -1,9 +1,9 @@
+using FluentValidation.AspNetCore;
 using Marketify;
 using Marketify.Date;
 using Marketify.Entites;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDependences(builder.Configuration);
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -13,6 +13,9 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader();
     });
 });
+builder.Services.AddDependences(builder.Configuration);
+//builder.Services.AddFluentValidationAutoValidation();
+//builder.Services.AddFluentValidationClientsideAdapters();
 
 //builder.Services
 //    .AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkStores<ApplicationDbContext>();
@@ -31,9 +34,10 @@ if (app.Environment.IsDevelopment())
     app.MapGet("/", () => Results.Redirect("/swagger"));
 }
 
+app.UseRouting();
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
-//app.MapIdentityApi<ApplicationUser>();
 app.MapControllers();
 
 app.Run();

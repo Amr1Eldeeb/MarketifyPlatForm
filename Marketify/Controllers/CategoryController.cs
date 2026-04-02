@@ -1,7 +1,11 @@
-﻿using Marketify.Contracts.Category;
+﻿using Marketify.Contracts.Authenthication;
+using Marketify.Contracts.Category;
 using Marketify.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Marketify.Controllers
 {
@@ -10,10 +14,16 @@ namespace Marketify.Controllers
     public class CategoryController : ControllerBase
     {
         private readonly ICategoryService _categoryService;
+        private readonly IConfiguration _configuration;
+        private readonly JwtOptions _jwtOptions;
 
-        public CategoryController(ICategoryService categoryService)
+        public CategoryController(ICategoryService categoryService,
+            IConfiguration configuration,
+            IOptions<JwtOptions>jwtOptions)
         {
             _categoryService = categoryService;
+            this._configuration = configuration;
+            _jwtOptions = jwtOptions.Value;
         }
 
         [HttpPost]
@@ -24,7 +34,7 @@ namespace Marketify.Controllers
             return BadRequest();
         }
         [HttpPut("{Id}")]
-        public async Task<IActionResult> EditCategory([FromRoute]int Id ,EditCategory editCategory)
+        public async Task<IActionResult> EditCategory([FromRoute]int Id ,[FromBody]EditCategory editCategory)
         {
             var result = await _categoryService.EditCategory(Id, editCategory);
             if (result) return Ok(result);
@@ -44,13 +54,19 @@ namespace Marketify.Controllers
             return Ok(response);
         }
         [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult>GetAllCategoryes()
         {
             var result =await _categoryService.GetAllCategories();
             return Ok(result);
         }
+        [HttpGet("Test")]
+        public IActionResult Test()
+        {
+          
+            
+            return Ok(_jwtOptions.ExpireyMinutes);
+        }
 
-
-
-    }
+}
 }

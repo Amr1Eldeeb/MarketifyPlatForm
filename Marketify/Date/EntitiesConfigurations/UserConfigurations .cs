@@ -13,6 +13,9 @@ namespace Marketify.Date.EntitiesConfigurations
             builder.Property(x=>x.LastName).HasMaxLength(70);
             builder.Property(x=>x.storeName).HasMaxLength(60);
             builder.Property(x=>x.storeDescriptions).HasMaxLength(250);
+            //builder.OwnsMany(x => x.refreshTokens)
+            //    .ToTable("RefreshTokens")
+            //    .WithOwner().HasForeignKey("UserId");
 
         }
     }

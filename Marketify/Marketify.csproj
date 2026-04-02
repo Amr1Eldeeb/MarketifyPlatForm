@@ -4,10 +4,12 @@
 		<TargetFramework>net9.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>93f87770-299a-4f1a-8fd4-3f99c19ca725</UserSecretsId>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
+		<PackageReference Include="MailKit" Version="4.15.1" />
 		<PackageReference Include="Mapster" Version="9.0.0-pre01" />
 		<PackageReference Include="Mapster.DependencyInjection" Version="9.0.0-pre01" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />

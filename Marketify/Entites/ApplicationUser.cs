@@ -16,3 +16,5 @@ namespace Marketify.Entites
 
     }
 }
+
+        //public List<RefreshToken> refreshTokens { get; set; } = [];
