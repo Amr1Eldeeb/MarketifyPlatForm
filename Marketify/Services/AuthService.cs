@@ -5,6 +5,7 @@ using Marketify.Helper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Org.BouncyCastle.Crypto.Prng;
+using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace Marketify.Services
 {
@@ -27,6 +28,16 @@ namespace Marketify.Services
             if (!isValid) return null;
             //generate Jwt Token
             var (token, expiresIn) = _jwtProvider.GenerateToken(user);
+            var time = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+            var emailBody = EmailBodyHelper.GenerateEmailBody("EmailUserLogIn",
+                new Dictionary<string, string>
+                {
+            { "{{username}}", user.FirstName },
+            { "{{login_time}}",time }
+                }
+            );
+
+            await _emailSender.SendEmailAsync(user.Email!, "Marketify  : UserlogedIn ✅", emailBody);
             return new AuthResponse(user.Id,user.Email,user.FirstName,user.LastName,token , expiresIn*60); 
         }
 

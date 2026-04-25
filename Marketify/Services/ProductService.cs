@@ -12,10 +12,13 @@ namespace Marketify.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _env;
-        public ProductService(ApplicationDbContext context , IWebHostEnvironment env)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public ProductService(ApplicationDbContext context , IWebHostEnvironment env,IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _env = env;
+            _httpContextAccessor = httpContextAccessor;
         }
         public async Task<bool> CreateProductAsync(CreateProduct dto)
         {
@@ -165,6 +168,32 @@ namespace Marketify.Services
             );
 
             return dto;
+        }
+
+        public async Task<IEnumerable<ProductReadDto>> GetAllProductsAsync()
+        {
+            var request = _httpContextAccessor.HttpContext.Request;
+            var baseUrl = $"{request.Scheme}://{request.Host}";
+
+            return await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Images)
+                .Include(p => p.ProductSizes).ThenInclude(ps => ps.Size)
+                .Select(p => new ProductReadDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    CategoryName = p.Category != null ? p.Category.Name : "General",
+
+                    ImageUrls = p.Images.Select(img =>
+                        $"{baseUrl}/images/{img.ImageUrl.Replace("images/", "").TrimStart('/')}"
+                    ).ToList(),
+
+                    Sizes = p.ProductSizes.Select(ps => ps.Size!.Name).ToList()
+                })
+                .ToListAsync();
         }
     }
 }

@@ -8,7 +8,8 @@ namespace Marketify.Date.EntitiesConfigurations
     {
         public void Configure(EntityTypeBuilder<OrderItem> builder)
         {
-            builder.Property(x => x.PriceAtPurchase).HasColumnType("decimal(18,2)");
+            //builder.Property(x => x.Quantity > 1);
+            
         }
     }
 }

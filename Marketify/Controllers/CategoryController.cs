@@ -33,7 +33,7 @@ namespace Marketify.Controllers
             if(result) return Ok(result);
             return BadRequest();
         }
-        [HttpPut("{Id}")]
+        [HttpPut("Edit/{Id}")]
         public async Task<IActionResult> EditCategory([FromRoute]int Id ,[FromBody]EditCategory editCategory)
         {
             var result = await _categoryService.EditCategory(Id, editCategory);
@@ -47,7 +47,7 @@ namespace Marketify.Controllers
             if(result) return Ok(result);
             return BadRequest();
         }
-        [HttpGet("{Id}")]
+        [HttpGet("GetById/{Id}")]
         public async Task<IActionResult> GetCategoryById([FromRoute] int Id)
         {
             var response = await _categoryService.GetCategoryById(Id);

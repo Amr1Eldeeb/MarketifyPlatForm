@@ -33,6 +33,8 @@ namespace Marketify
             services.AddScoped<IEmailSender, EmailServecies>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<ICartServices,CartServices>();
             services.AddAuthConfig( configuration);
             services.AddControllers();
             services.AddAuthorazationsConfig(configuration);

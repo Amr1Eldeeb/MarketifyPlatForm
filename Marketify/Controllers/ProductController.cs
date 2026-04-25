@@ -80,6 +80,12 @@ namespace Marketify.Controllers
             if (productDto == null) return NotFound();
             return Ok(productDto);
         }
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ProductReadDto>>> GetProducts()
+        {
+            var products = await _productService.GetAllProductsAsync();
+            return Ok(products);
+        }
 
     }
 

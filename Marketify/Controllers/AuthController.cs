@@ -11,7 +11,7 @@ namespace Marketify.Controllers
     {
         private readonly IAuthService _authService = auth;
 
-        [HttpPost("")]
+        [HttpPost("Login")]
         public async Task<IActionResult>LoginAsync(LoginRequest request,CancellationToken cancellationToken = default)
         {
             var authResult = await _authService.GetTokenAsync(request.Email, request.Password);
@@ -54,7 +54,7 @@ namespace Marketify.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var message  = await _authService.ForgotPasswordAsync(model.Email);
+            var message  = await _authService.ForgotPasswordAsync(model);
             return Ok(new { message = message });
         }
         [HttpPost("reset-password")]
@@ -67,5 +67,18 @@ namespace Marketify.Controllers
                 return Ok(new { message = result });
 
         }
+
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            return Ok(new { message = "Logged out successfully" });
+        }
+
+
+
+
+
+
+
     }
 }

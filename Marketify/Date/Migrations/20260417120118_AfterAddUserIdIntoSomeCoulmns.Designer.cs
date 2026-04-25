@@ -4,6 +4,7 @@ using Marketify.Date;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Marketify.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260417120118_AfterAddUserIdIntoSomeCoulmns")]
+    partial class AfterAddUserIdIntoSomeCoulmns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -115,7 +118,7 @@ namespace Marketify.Migrations
                         {
                             Id = "b74ddd14-6340-4840-95c2-db12554843e5",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "45a8c3f3-0576-4acd-8ebe-37b07a65a639",
+                            ConcurrencyStamp = "53762dbe-576c-4970-8ed5-5727d161433e",
                             Email = "test@user.com",
                             EmailConfirmed = true,
                             FirstName = "Ahmed",
@@ -123,10 +126,10 @@ namespace Marketify.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "TEST@USER.COM",
                             NormalizedUserName = "TEST@USER.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEDqY3blZNAaqNLKjymjn4tJEPq2zCRgebaK005FPlNMNtfui4QqId3n7leq5J6uqJg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEG90FyQ4RDxrNr8JnBKf9RZhMYcg9Xlpc5IfUrZbIY7IV6npjyjjTzN85IMDM8+Y/A==",
                             PhoneNumberAddingKeyofCountry = 0,
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "9e9380ec-3d67-416c-ac4c-3c1833aada2a",
+                            SecurityStamp = "96ebce78-3c07-4215-b659-60c0493441fb",
                             TwoFactorEnabled = false,
                             UserName = "test@user.com"
                         });
@@ -393,23 +396,11 @@ namespace Marketify.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ShippingAddress")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Street")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("TotalAmount")

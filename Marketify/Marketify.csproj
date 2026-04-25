@@ -30,10 +30,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Contracts\Cart\" />
-		<Folder Include="Contracts\CartItem\" />
-		<Folder Include="Contracts\OrderItem\" />
-		<Folder Include="Contracts\Order\" />
 		<Folder Include="Contracts\Review\" />
 		<Folder Include="wwwroot\images\" />
 	</ItemGroup>
