@@ -195,5 +195,33 @@ namespace Marketify.Services
                 })
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<ProductReadDto>> GetProductByCategory(int? categoryId)
+        {
+            if (categoryId == null) return Enumerable.Empty<ProductReadDto>();
+
+            var request = _httpContextAccessor.HttpContext.Request;
+            var baseUrl = $"{request.Scheme}://{request.Host}";
+
+            return await _context.Products.Where(x=>x.CategoryId ==categoryId)
+                .Include(p => p.Category)
+                .Include(p => p.Images)
+                .Include(p => p.ProductSizes).ThenInclude(ps => ps.Size)
+                .Select(p => new ProductReadDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    CategoryName = p.Category != null ? p.Category.Name : "General",
+
+                    ImageUrls = p.Images.Select(img =>
+                        $"{baseUrl}/images/{img.ImageUrl.Replace("images/", "").TrimStart('/')}"
+                    ).ToList(),
+
+                    Sizes = p.ProductSizes.Select(ps => ps.Size!.Name).ToList()
+                })
+                .ToListAsync();
+        }
     }
 }

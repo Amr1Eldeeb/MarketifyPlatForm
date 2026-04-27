@@ -1,7 +1,10 @@
 ﻿using Marketify.Contracts.Authenthication;
 using Marketify.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Marketify.Controllers
 {
@@ -74,8 +77,18 @@ namespace Marketify.Controllers
             return Ok(new { message = "Logged out successfully" });
         }
 
-
-
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet(("me"))]
+        public async  Task<IActionResult>getUserinfo()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result  = await _authService.GetUserInfoAsync(userId);
+            if(result is null)
+            {
+                return  Unauthorized();
+            }
+            return Ok(result);
+        }
 
 
 

@@ -1,22 +1,24 @@
 ﻿using Marketify.Authentication;
 using Marketify.Contracts.Authenthication;
+using Marketify.Date;
 using Marketify.Entites;
 using Marketify.Helper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.EntityFrameworkCore;
 using Org.BouncyCastle.Crypto.Prng;
 using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace Marketify.Services
 {
     public class AuthService(UserManager<ApplicationUser>usermanger,IJwtProvider jwtProvider,
-        ILogger<AuthService> logger, IEmailSender emailSender) : IAuthService
+        ILogger<AuthService> logger, IEmailSender emailSender, ApplicationDbContext dbContext) : IAuthService
     {
         private readonly UserManager<ApplicationUser> _userManger = usermanger;
         private readonly IJwtProvider _jwtProvider = jwtProvider;
         private readonly ILogger<AuthService> _logger = logger;
         private readonly IEmailSender _emailSender = emailSender;
-
+        private readonly ApplicationDbContext _context = dbContext;
 
         public async Task<AuthResponse?> GetTokenAsync(string Email, string password, CancellationToken cancellationToken = default)
         {
@@ -56,6 +58,7 @@ namespace Marketify.Services
                 FirstName = model.FirstName,
                 LastName = model.LastName,
                 Address = model.Address,
+                PhoneNumber = model.PhoneNumber
             };
 
             var result = await _userManger.CreateAsync(user, model.Password);
@@ -154,6 +157,27 @@ namespace Marketify.Services
                 return string.Join(", ", result.Errors.Select(e => e.Description));
 
             return "Password has been reset successfully ✅";
+        }
+
+        public async Task<GetUserInfo?> GetUserInfoAsync(string userId)
+        {
+            var user = await _context.Users
+        .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user is null)
+                return null;
+
+            return new GetUserInfo
+            (
+                user.Id,
+                user.FirstName,
+                user.LastName,
+                user.Email!,
+                user.PhoneNumber,
+           user.Address
+            );
+
+
         }
     }
 }

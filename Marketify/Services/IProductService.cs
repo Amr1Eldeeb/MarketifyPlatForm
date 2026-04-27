@@ -9,5 +9,6 @@ namespace Marketify.Services
         Task<bool> DeleteProductAsync(int Id);
         Task<ProductResponseDto> GetByID(int Id);
         public Task<IEnumerable<ProductReadDto>> GetAllProductsAsync();
+        public Task<IEnumerable<ProductReadDto>> GetProductByCategory(int?  categoryId);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Marketify.Contracts.Product;
+using Marketify.Entites;
 using Marketify.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -86,7 +87,12 @@ namespace Marketify.Controllers
             var products = await _productService.GetAllProductsAsync();
             return Ok(products);
         }
-
+        [HttpGet("GetProductsByCatID")]
+        public async Task<ActionResult<IEnumerable<ProductReadDto>>> GetAllProductBycateId([FromQuery] int categoryid)
+        {
+            var products = await _productService.GetProductByCategory(categoryid);
+            return Ok(products);
+        }
     }
 
 }

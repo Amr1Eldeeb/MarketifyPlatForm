@@ -10,5 +10,6 @@ namespace Marketify.Services
         Task<string> ConfirmEmailAsync(ConfirmEmailRequest model);
         Task<string> ForgotPasswordAsync(ForgotPassword email);
         Task<string> ResetPasswordAsync(ResetPassword request);
+        Task<GetUserInfo> GetUserInfoAsync(string userId);
     }
 }

@@ -54,7 +54,7 @@ namespace Marketify.Controllers
             return Ok(response);
         }
         [HttpGet]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult>GetAllCategoryes()
         {
             var result =await _categoryService.GetAllCategories();

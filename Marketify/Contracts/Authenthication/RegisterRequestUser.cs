@@ -6,8 +6,8 @@
         string Password,
         string FirstName,
         string LastName,
-        string Address
-
+        string Address,
+        string PhoneNumber
 
 
 
