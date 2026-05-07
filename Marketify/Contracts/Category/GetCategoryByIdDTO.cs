@@ -2,6 +2,7 @@
 {
     public record GetCategoryByIdDTO
     (
+        int Id ,
         string Name 
         
         )   ;

@@ -58,7 +58,7 @@ namespace Marketify.Services
         public async Task<GetCategoryByIdDTO> GetCategoryById(int Id)
         {
             var category = _context.Categories.SingleOrDefault(c => c.Id == Id);
-            var dto = new GetCategoryByIdDTO(category.Name);
+            var dto = new GetCategoryByIdDTO(category.Id ,category.Name);
             
             return dto;
         }
@@ -66,8 +66,8 @@ namespace Marketify.Services
         public async Task<IEnumerable<GetCategoryByIdDTO>> GetAllCategories()
         {
             var categoris = await _context.Categories
-        .Select(x => new GetCategoryByIdDTO(x.Name))
-        .ToListAsync();
+                 .Select(x => new GetCategoryByIdDTO(x.Id , x.Name!))
+         .ToListAsync();
 
             return categoris;
 

@@ -87,12 +87,13 @@ namespace Marketify.Controllers
             var products = await _productService.GetAllProductsAsync();
             return Ok(products);
         }
-        [HttpGet("GetProductsByCatID")]
-        public async Task<ActionResult<IEnumerable<ProductReadDto>>> GetAllProductBycateId([FromQuery] int categoryid)
+        [HttpGet("GetProductsByCatID/{Id:int}")]
+        public async Task<ActionResult<IEnumerable<ProductReadDto>>> GetAllProductBycateId([FromRoute] int Id)
         {
-            var products = await _productService.GetProductByCategory(categoryid);
+            var products = await _productService.GetProductByCategory(Id);
             return Ok(products);
         }
+
     }
 
 }
