@@ -2,6 +2,7 @@ using FluentValidation.AspNetCore;
 using Marketify;
 using Marketify.Date;
 using Marketify.Entites;
+using Marketify.Roles;
 
 var builder = WebApplication.CreateBuilder(args);
 //builder.Services.AddCors(options =>
@@ -42,6 +43,10 @@ if (app.Environment.IsDevelopment())
     });
 
     app.MapGet("/", () => Results.Redirect("/swagger"));
+}
+using (var scope = app.Services.CreateScope())
+{
+    await DatabaseSeeder.SeedRolesAsync(scope.ServiceProvider);
 }
 
 app.UseRouting();

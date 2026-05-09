@@ -4,7 +4,7 @@ namespace Marketify.Services
 {
     public interface IProductService
     {
-        Task<bool> CreateProductAsync(CreateProduct dto);
+        Task<bool> CreateProductAsync(CreateProduct dto, string merchantId);
         Task<bool> EditProductAsync(int Id,EditProduct dto);
         Task<bool> DeleteProductAsync(int Id);
         Task<ProductResponseDto> GetByID(int Id);

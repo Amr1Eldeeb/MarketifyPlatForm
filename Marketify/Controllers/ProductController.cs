@@ -1,8 +1,12 @@
 ﻿using Marketify.Contracts.Product;
 using Marketify.Entites;
+using Marketify.Roles;
 using Marketify.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Marketify.Controllers
 {
@@ -16,19 +20,34 @@ namespace Marketify.Controllers
         {
             _productService = productService;
         }
+        [HttpGet("test-claims")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public IActionResult TestClaims()
+        {
+            var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
 
+            var isSuperAdmin = User.IsInRole("SuperAdmin");
+
+            return Ok(new
+            {
+                IsSuperAdmin = isSuperAdmin,
+                Claims = claims
+            });
+        }
         [HttpPost]
-        [Consumes("multipart/form-data")] //detemine action allow files
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+            Roles =AppRoles.SuperAdmin)]
+        [Consumes("multipart/form-data")] 
         public async Task<IActionResult> Create([FromForm] CreateProduct request)
         {
             if (request.Images == null || !request.Images.Any())
             {
                 return BadRequest("plz upload image");
             }
-
+            var merchantId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
             try
             {
-                var result = await _productService.CreateProductAsync(request);
+                var result = await _productService.CreateProductAsync(request,merchantId!);
 
                 if (result)
                 {

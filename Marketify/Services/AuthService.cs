@@ -1,8 +1,10 @@
-﻿using Marketify.Authentication;
+﻿using Mapster;
+using Marketify.Authentication;
 using Marketify.Contracts.Authenthication;
 using Marketify.Date;
 using Marketify.Entites;
 using Marketify.Helper;
+using Marketify.Roles;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +13,7 @@ using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace Marketify.Services
 {
-    public class AuthService(UserManager<ApplicationUser>usermanger,IJwtProvider jwtProvider,
+    public class AuthService(UserManager<ApplicationUser> usermanger, IJwtProvider jwtProvider,
         ILogger<AuthService> logger, IEmailSender emailSender, ApplicationDbContext dbContext) : IAuthService
     {
         private readonly UserManager<ApplicationUser> _userManger = usermanger;
@@ -23,13 +25,14 @@ namespace Marketify.Services
         public async Task<AuthResponse?> GetTokenAsync(string Email, string password, CancellationToken cancellationToken = default)
         {
             var user = await _userManger.FindByEmailAsync(Email);
-            
+
             if (user == null) return null;
 
-           var isValid =  await _userManger.CheckPasswordAsync(user, password);
+            var isValid = await _userManger.CheckPasswordAsync(user, password);
             if (!isValid) return null;
             //generate Jwt Token
-            var (token, expiresIn) = _jwtProvider.GenerateToken(user);
+            var userRoles = await _userManger.GetRolesAsync(user);
+            var (token, expiresIn) = _jwtProvider.GenerateToken(user, userRoles);
             var time = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
             var emailBody = EmailBodyHelper.GenerateEmailBody("EmailUserLogIn",
                 new Dictionary<string, string>
@@ -40,7 +43,7 @@ namespace Marketify.Services
             );
 
             await _emailSender.SendEmailAsync(user.Email!, "Marketify  : UserlogedIn ✅", emailBody);
-            return new AuthResponse(user.Id,user.Email,user.FirstName,user.LastName,token , expiresIn*60); 
+            return new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn * 60);
         }
 
         public async Task<string> RegisterAsync(RegisterRequestUser model, CancellationToken cancellationToken = default)
@@ -67,7 +70,7 @@ namespace Marketify.Services
             {
                 return result.Errors.FirstOrDefault()?.Description ?? "Registration Failed";
             }
-
+            var roleResult = await _userManger.AddToRoleAsync(user, AppRoles.Customer);
             var code = await _userManger.GenerateTwoFactorTokenAsync(user, "Email");
 
             var emailBody = EmailBodyHelper.GenerateEmailBody("Emailconfirmation",
@@ -178,6 +181,85 @@ namespace Marketify.Services
             );
 
 
+        }
+
+        public async Task<string> AssignMerchantRoleAsync(string email)
+        {
+            var user = await _userManger.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return "User Not Found";
+
+            }
+            if (await _userManger.IsInRoleAsync(user, AppRoles.Merchant))
+            {
+                return "User Already in a Merchant";
+            }
+            var result = await _userManger.AddToRoleAsync(user, AppRoles.Merchant);
+            return result.Succeeded ? "Success" : "Failed To Assign To Role";
+        }
+
+        public async Task<IEnumerable<DisplayAllUsers>> GetAllUsers()
+        {
+            var users = await _userManger.Users.ToListAsync();
+            var userwithrole = new List<DisplayAllUsers>();
+
+            foreach (var user in users)
+            {
+                var roles = await _userManger.GetRolesAsync(user);
+
+                userwithrole.Add(new DisplayAllUsers
+                {
+                    DisplayName = $"{user.FirstName} {user.LastName}", 
+                    Email = user.Email!,
+                    Id = user.Id,
+                    Roles = roles
+                }); 
+            }
+
+            return userwithrole;
+        }
+
+        public async Task<GetUserByEmail> GetUserByEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return null!;
+            }
+
+            var user = await _userManger.FindByEmailAsync(email); 
+            if (user == null)
+            {
+                return null!;
+            }
+
+            var roles = await _userManger.GetRolesAsync(user);
+            var userByEmail = new GetUserByEmail
+                (
+                    Id: user.Id,
+                    FullName: $"{user.FirstName} {user.LastName}",
+                    Email: email,
+                    PhoneNumber: user.PhoneNumber,
+                    address: user.Address,
+                    Roles: roles
+                );
+
+            return userByEmail;
+        }
+
+        public async Task<bool> DeleteUserByEmailAsync(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return false;
+
+            var user = await _userManger.FindByEmailAsync(email);
+
+            if (user == null)
+                return false;
+
+            var result = await _userManger.DeleteAsync(user);
+
+            return result.Succeeded;
         }
     }
 }

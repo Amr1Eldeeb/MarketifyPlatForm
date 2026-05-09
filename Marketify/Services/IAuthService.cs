@@ -11,5 +11,10 @@ namespace Marketify.Services
         Task<string> ForgotPasswordAsync(ForgotPassword email);
         Task<string> ResetPasswordAsync(ResetPassword request);
         Task<GetUserInfo> GetUserInfoAsync(string userId);
+        // admn
+        Task<string> AssignMerchantRoleAsync(string email);
+        Task<IEnumerable<DisplayAllUsers>> GetAllUsers();
+        Task<GetUserByEmail>GetUserByEmail(string email);
+        Task<bool> DeleteUserByEmailAsync(string email);
     }
 }

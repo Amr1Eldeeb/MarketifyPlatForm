@@ -11,5 +11,7 @@ namespace Marketify.Contracts.Product
         List<int> SelectedSizeIds,
         List<IFormFile> Images,
         int MainImageIndex 
+         
     );
 }
+    

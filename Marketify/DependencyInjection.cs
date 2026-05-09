@@ -14,7 +14,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
+using System.Security.Claims;
 using System.Text;
 namespace Marketify
 {
@@ -81,7 +83,16 @@ namespace Marketify
             services.AddScoped<IJwtProvider, JwtProvider>();
             services.Configure<JwtOptions>(configuration.GetSection("Jwt")); 
             var Jwtsettings = configuration.GetSection("Jwt").Get<JwtOptions>();
-
+            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                options.Password.RequiredLength = 8;
+                options.SignIn.RequireConfirmedEmail = true;
+                options.User.RequireUniqueEmail = true;
+                options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultEmailProvider
+                ; options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultEmailProvider;
+            })
+        .AddEntityFrameworkStores<ApplicationDbContext>()
+        .AddDefaultTokenProviders();
             services.AddAuthentication(option =>
             {
                 option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -98,6 +109,7 @@ namespace Marketify
                     ValidateAudience = true,
                     ValidateIssuerSigningKey = true,
                     ValidateLifetime = true,
+                    RoleClaimType = ClaimTypes.Role,
                     ValidIssuer = Jwtsettings!.Issuer,
                     ValidAudience = Jwtsettings.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey
@@ -105,16 +117,7 @@ namespace Marketify
                 
                 };
             });
-            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-            {
-                options.Password.RequiredLength = 8;
-                options.SignIn.RequireConfirmedEmail = true;
-                options.User.RequireUniqueEmail = true;
-                options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultEmailProvider
-                ; options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultEmailProvider;
-            })
-            .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders();
+        
 
             return services;
         }

@@ -20,7 +20,7 @@ namespace Marketify.Services
             _env = env;
             _httpContextAccessor = httpContextAccessor;
         }
-        public async Task<bool> CreateProductAsync(CreateProduct dto)
+        public async Task<bool> CreateProductAsync(CreateProduct dto, string merchantId)
         {
             var product = new Product
             {
@@ -29,7 +29,8 @@ namespace Marketify.Services
                 Price = dto.Price,
                 StockQuantity = dto.StockQuantity,
                 CategoryId = dto.CategoryId,
-                Images = new List<ProductImage>()
+                Images = new List<ProductImage>(),
+                VendorId =merchantId
             };
 
             product.ProductSizes = dto.SelectedSizeIds
