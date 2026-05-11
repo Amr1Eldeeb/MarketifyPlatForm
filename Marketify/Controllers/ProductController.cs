@@ -112,7 +112,12 @@ namespace Marketify.Controllers
             var products = await _productService.GetProductByCategory(Id);
             return Ok(products);
         }
-
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] string query)
+        {
+            var results = await _productService.SearchProductsAsync(query);
+            return Ok(results);
+        }
     }
 
 }

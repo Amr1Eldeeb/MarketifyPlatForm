@@ -18,7 +18,7 @@ namespace Marketify.Controllers
         public async Task<IActionResult>LoginAsync(LoginRequest request,CancellationToken cancellationToken = default)
         {
             var authResult = await _authService.GetTokenAsync(request.Email, request.Password);
-            return authResult is null ? BadRequest("Invalid Email/password") : Ok(authResult);
+            return authResult.IsSuccess ? Ok(authResult.Value) : BadRequest(authResult.Error);
         }
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequestUser model, CancellationToken cancellationToken)

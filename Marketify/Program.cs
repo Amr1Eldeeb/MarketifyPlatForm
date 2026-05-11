@@ -2,6 +2,7 @@ using FluentValidation.AspNetCore;
 using Marketify;
 using Marketify.Date;
 using Marketify.Entites;
+using Marketify.PaymentServices;
 using Marketify.Roles;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,6 +32,8 @@ builder.Services.AddCors(options =>
                   .AllowAnyMethod();
         });
 });
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient<PaymobService>();
 var app = builder.Build();
 app.UseStaticFiles();
 if (app.Environment.IsDevelopment())

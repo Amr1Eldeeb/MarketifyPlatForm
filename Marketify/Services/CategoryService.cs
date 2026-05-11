@@ -2,15 +2,19 @@
 using Marketify.Date;
 using Marketify.Entites;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Marketify.Services
 {
     public class CategoryService : ICategoryService
     {
         private readonly ApplicationDbContext _context;
-        public CategoryService(ApplicationDbContext context)
+        private readonly IMemoryCache _cache;
+
+        public CategoryService(ApplicationDbContext context, IMemoryCache cache)
         {
             _context = context;
+            _cache = cache;
         }
         public async Task<bool> CreateCategory(CreateCategoryDto Dto)
         {
@@ -65,14 +69,22 @@ namespace Marketify.Services
 
         public async Task<IEnumerable<GetCategoryByIdDTO>> GetAllCategories()
         {
-            var categoris = await _context.Categories
-                 .Select(x => new GetCategoryByIdDTO(x.Id , x.Name!))
-         .ToListAsync();
+            string cacheKey = "all_categories_list";
 
-            return categoris;
+            if (!_cache.TryGetValue(cacheKey, out IEnumerable<GetCategoryByIdDTO>? categories))
+            {
+                categories = await _context.Categories
+                    .Select(x => new GetCategoryByIdDTO(x.Id, x.Name!))
+                    .ToListAsync();
 
+                var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetAbsoluteExpiration(TimeSpan.FromHours(1))
+                    .SetPriority(CacheItemPriority.High);
 
+                _cache.Set(cacheKey, categories, cacheOptions);
+            }
 
+            return categories!;
         }
     }
 }

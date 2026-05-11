@@ -1,8 +1,10 @@
 ﻿using Mapster;
+using Marketify.Abstraction;
 using Marketify.Authentication;
 using Marketify.Contracts.Authenthication;
 using Marketify.Date;
 using Marketify.Entites;
+using Marketify.Erros;
 using Marketify.Helper;
 using Marketify.Roles;
 using Microsoft.AspNetCore.Identity;
@@ -22,15 +24,15 @@ namespace Marketify.Services
         private readonly IEmailSender _emailSender = emailSender;
         private readonly ApplicationDbContext _context = dbContext;
 
-        public async Task<AuthResponse?> GetTokenAsync(string Email, string password, CancellationToken cancellationToken = default)
+        public async Task<Result<AuthResponse>> GetTokenAsync(string Email, string password, CancellationToken cancellationToken = default)
         {
             var user = await _userManger.FindByEmailAsync(Email);
 
-            if (user == null) return null;
+            if (user == null) return 
+                    Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 
             var isValid = await _userManger.CheckPasswordAsync(user, password);
             if (!isValid) return null;
-            //generate Jwt Token
             var userRoles = await _userManger.GetRolesAsync(user);
             var (token, expiresIn) = _jwtProvider.GenerateToken(user, userRoles);
             var time = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
@@ -43,7 +45,8 @@ namespace Marketify.Services
             );
 
             await _emailSender.SendEmailAsync(user.Email!, "Marketify  : UserlogedIn ✅", emailBody);
-            return new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn * 60);
+           var response = new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn * 60);
+            return Result.Success<AuthResponse>(response);
         }
 
         public async Task<string> RegisterAsync(RegisterRequestUser model, CancellationToken cancellationToken = default)

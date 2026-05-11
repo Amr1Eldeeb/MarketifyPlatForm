@@ -5,6 +5,7 @@ using Marketify.Entites;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Marketify.Services
 {
@@ -13,12 +14,17 @@ namespace Marketify.Services
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _env;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IMemoryCache _cache;
 
-        public ProductService(ApplicationDbContext context , IWebHostEnvironment env,IHttpContextAccessor httpContextAccessor)
+        public ProductService(ApplicationDbContext context , IWebHostEnvironment env,
+            IHttpContextAccessor httpContextAccessor,
+            IMemoryCache cache
+            )
         {
             _context = context;
             _env = env;
             _httpContextAccessor = httpContextAccessor;
+            _cache = cache;
         }
         public async Task<bool> CreateProductAsync(CreateProduct dto, string merchantId)
         {
@@ -173,28 +179,40 @@ namespace Marketify.Services
 
         public async Task<IEnumerable<ProductReadDto>> GetAllProductsAsync()
         {
-            var request = _httpContextAccessor.HttpContext.Request;
-            var baseUrl = $"{request.Scheme}://{request.Host}";
+            string cacheKey = "all_products_list";
 
-            return await _context.Products
-                .Include(p => p.Category)
-                .Include(p => p.Images)
-                .Include(p => p.ProductSizes).ThenInclude(ps => ps.Size)
-                .Select(p => new ProductReadDto
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Description = p.Description,
-                    Price = p.Price,
-                    CategoryName = p.Category != null ? p.Category.Name : "General",
+            if (!_cache.TryGetValue(cacheKey, out IEnumerable<ProductReadDto> cachedProducts))
+            {
+                var request = _httpContextAccessor.HttpContext.Request;
+                var baseUrl = $"{request.Scheme}://{request.Host}";
 
-                    ImageUrls = p.Images.Select(img =>
-                        $"{baseUrl}/images/{img.ImageUrl.Replace("images/", "").TrimStart('/')}"
-                    ).ToList(),
+                cachedProducts = await _context.Products
+                    .Include(p => p.Category)
+                    .Include(p => p.Images)
+                    .Include(p => p.ProductSizes).ThenInclude(ps => ps.Size)
+                    .Select(p => new ProductReadDto
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        Description = p.Description,
+                        Price = p.Price,
+                        CategoryName = p.Category != null ? p.Category.Name : "General",
+                        ImageUrls = p.Images.Select(img =>
+                            $"{baseUrl}/images/{img.ImageUrl.Replace("images/", "").TrimStart('/')}"
+                        ).ToList(),
+                        Sizes = p.ProductSizes.Select(ps => ps.Size!.Name).ToList()
+                    })
+                    .ToListAsync();
 
-                    Sizes = p.ProductSizes.Select(ps => ps.Size!.Name).ToList()
-                })
-                .ToListAsync();
+                var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(30)) 
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(10)) 
+                    .SetPriority(CacheItemPriority.Normal);
+
+                _cache.Set(cacheKey, cachedProducts, cacheOptions);
+            }
+
+            return cachedProducts!;
         }
 
         public async Task<IEnumerable<ProductReadDto>> GetProductByCategory(int? categoryId)
@@ -223,6 +241,32 @@ namespace Marketify.Services
                     Sizes = p.ProductSizes.Select(ps => ps.Size!.Name).ToList()
                 })
                 .ToListAsync();
+        }
+        public async Task<IEnumerable<ProductReadDto>> SearchProductsAsync(string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+                return Enumerable.Empty<ProductReadDto>();
+
+            var request = _httpContextAccessor.HttpContext.Request;
+            var baseUrl = $"{request.Scheme}://{request.Host}";
+
+            var query = _context.Products
+                .Where(p => p.Name.Contains(searchTerm) || p.Description.Contains(searchTerm))
+                .Include(p => p.Category)
+                .Include(p => p.Images)
+                .AsQueryable();
+
+            return await query.Select(p => new ProductReadDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                Price = p.Price,
+                CategoryName = p.Category != null ? p.Category.Name : "General",
+                ImageUrls = p.Images.Select(img =>
+                    $"{baseUrl}/images/{img.ImageUrl.Replace("images/", "").TrimStart('/')}"
+                ).ToList()
+            }).ToListAsync();
         }
     }
 }

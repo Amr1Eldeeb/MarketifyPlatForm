@@ -1,4 +1,5 @@
 ﻿using Marketify.Contracts.Product;
+using Marketify.Contracts.Review;
 
 namespace Marketify.Services
 {
@@ -10,5 +11,9 @@ namespace Marketify.Services
         Task<ProductResponseDto> GetByID(int Id);
         public Task<IEnumerable<ProductReadDto>> GetAllProductsAsync();
         public Task<IEnumerable<ProductReadDto>> GetProductByCategory(int?  categoryId);
+
+        public  Task<IEnumerable<ProductReadDto>> SearchProductsAsync(string searchTerm);
+        //Task<bool> AddReviewAsync(string userId, CreateReviewDto reviewDto);
+        //Task<IEnumerable<ReviewDto>> GetProductReviewsAsync(int productId);
     }
 }

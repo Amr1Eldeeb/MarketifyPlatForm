@@ -81,6 +81,7 @@ namespace Marketify
             services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IJwtProvider, JwtProvider>();
+            services.AddScoped<IReviewService, ReviewService>();
             services.Configure<JwtOptions>(configuration.GetSection("Jwt")); 
             var Jwtsettings = configuration.GetSection("Jwt").Get<JwtOptions>();
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
