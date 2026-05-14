@@ -1,4 +1,4 @@
-﻿    using Marketify.Contracts.Authenthication;
+﻿using Marketify.Contracts.Authenthication;
 using Marketify.Entites;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -32,11 +32,9 @@ namespace Marketify.Authentication
             var symmetricSecurityKey = new SymmetricSecurityKey
                 (Encoding.UTF8.GetBytes(_jwtOptions.key));
             var signinCredentials = new SigningCredentials(symmetricSecurityKey,SecurityAlgorithms.HmacSha256);
-            //معاناها بقول خد الكي دا والالجوزراميه دي عشان نعمل التوكن
-            // toDo
             var expiresIn = 30;
             var expiresInDate  = DateTime.UtcNow.AddMinutes(expiresIn);
-            var token = new JwtSecurityToken // شكل التوكن
+            var token = new JwtSecurityToken //shpe
                 (
                 issuer: _jwtOptions.Issuer
                , audience: _jwtOptions.Audience

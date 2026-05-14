@@ -36,8 +36,8 @@ namespace Marketify.PaymentServices
             var data = new
             {
                 auth_token = token,
-                delivery_needed = false, // شيل علامات التنصيص خليها Boolean
-                amount_cents = (int)(amount * 100), // حولها لـ int صريح هنا
+                delivery_needed = false, 
+                amount_cents = (int)(amount * 100),
                 currency = "EGP",
                 items = new List<object>()
             };

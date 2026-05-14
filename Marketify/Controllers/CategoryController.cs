@@ -1,5 +1,6 @@
 ﻿using Marketify.Contracts.Authenthication;
 using Marketify.Contracts.Category;
+using Marketify.Roles;
 using Marketify.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -26,8 +27,9 @@ namespace Marketify.Controllers
             _jwtOptions = jwtOptions.Value;
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppRoles.SuperAdmin)]
         [HttpPost]
-         public async Task<IActionResult>AddCategory([FromBody]CreateCategoryDto categoryDto)
+        public async Task<IActionResult>AddCategory([FromBody]CreateCategoryDto categoryDto)
         {
             var result =await _categoryService.CreateCategory(categoryDto);
             if(result) return Ok(result);
@@ -41,6 +43,8 @@ namespace Marketify.Controllers
             return BadRequest();
         }
         [HttpDelete("{Id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = AppRoles.SuperAdmin)]
+
         public async Task<IActionResult>SoftDeleteCategory([FromRoute]int Id)
         {
             var result = await _categoryService.SoftDelete(Id);

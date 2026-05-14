@@ -25,13 +25,7 @@ namespace Marketify
         public static IServiceCollection AddDependences(this IServiceCollection services,
             IConfiguration configuration)
         {
-            //services.AddCors(Options => Options.
-            //AddDefaultPolicy(builder => builder.
-            //AllowAnyOrigin().
-            //AllowAnyHeader()
-            //.AllowAnyMethod()
-
-            //));
+           
             services.AddScoped<IEmailSender, EmailServecies>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoryService, CategoryService>();
@@ -39,9 +33,11 @@ namespace Marketify
             services.AddScoped<ICartServices,CartServices>();
             services.AddAuthConfig( configuration);
             services.AddControllers();
+
             services.AddAuthorazationsConfig(configuration);
             var connencationString = configuration.GetConnectionString("DefaultConnection")
                 ?? throw new InvalidOperationException("Connection String is Not Found");
+
             services.AddDbContext
                 <ApplicationDbContext>
                 (options => options.UseSqlServer(connencationString));
@@ -55,7 +51,6 @@ namespace Marketify
         {
         
 
-            // to make code number not string
             services.ConfigureApplicationCookie(options => {
                 options.Events.OnRedirectToLogin = context => {
                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
@@ -84,6 +79,7 @@ namespace Marketify
             services.AddScoped<IReviewService, ReviewService>();
             services.Configure<JwtOptions>(configuration.GetSection("Jwt")); 
             var Jwtsettings = configuration.GetSection("Jwt").Get<JwtOptions>();
+
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
                 options.Password.RequiredLength = 8;

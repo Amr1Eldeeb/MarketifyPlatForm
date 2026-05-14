@@ -59,10 +59,10 @@ namespace Marketify.Services
         }
         
 
-        public async Task<GetCategoryByIdDTO> GetCategoryById(int Id)
+        public async Task<GetCategoryByIdDTO?> GetCategoryById(int Id)
         {
             var category = _context.Categories.SingleOrDefault(c => c.Id == Id);
-            var dto = new GetCategoryByIdDTO(category.Id ,category.Name);
+            var dto = new GetCategoryByIdDTO(category.Id ,category.Name!);
             
             return dto;
         }

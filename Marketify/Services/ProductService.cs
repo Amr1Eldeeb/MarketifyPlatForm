@@ -14,7 +14,7 @@ namespace Marketify.Services
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _env;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IMemoryCache _cache;
+        private readonly IMemoryCache _memoryCache;
 
         public ProductService(ApplicationDbContext context , IWebHostEnvironment env,
             IHttpContextAccessor httpContextAccessor,
@@ -24,7 +24,7 @@ namespace Marketify.Services
             _context = context;
             _env = env;
             _httpContextAccessor = httpContextAccessor;
-            _cache = cache;
+            _memoryCache = cache;
         }
         public async Task<bool> CreateProductAsync(CreateProduct dto, string merchantId)
         {
@@ -128,9 +128,11 @@ namespace Marketify.Services
 
         public async  Task<bool> DeleteProductAsync(int Id)
         {
-            var product = _context.Products.Include(x => x.Images).Include(p => p.ProductSizes)
-                .SingleOrDefault(x=>x.Id ==Id);
-            if(product is null)
+            var product = await _context.Products
+    .Include(x => x.Images)
+    .Include(p => p.ProductSizes)
+    .FirstOrDefaultAsync(x => x.Id == Id);
+            if (product is null)
             
                 return false; 
             foreach(var image in product.Images)
@@ -179,40 +181,28 @@ namespace Marketify.Services
 
         public async Task<IEnumerable<ProductReadDto>> GetAllProductsAsync()
         {
-            string cacheKey = "all_products_list";
+            var request = _httpContextAccessor.HttpContext?.Request;
+            var baseUrl = $"{request?.Scheme}://{request?.Host}";
 
-            if (!_cache.TryGetValue(cacheKey, out IEnumerable<ProductReadDto> cachedProducts))
-            {
-                var request = _httpContextAccessor.HttpContext.Request;
-                var baseUrl = $"{request.Scheme}://{request.Host}";
+            var products = await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Images)
+                .Include(p => p.ProductSizes).ThenInclude(ps => ps.Size)
+                .Select(p => new ProductReadDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    CategoryName = p.Category != null ? p.Category.Name : "General",
+                    ImageUrls = p.Images.Select(img =>
+                        $"{baseUrl}/images/{img.ImageUrl.Replace("images/", "").TrimStart('/')}"
+                    ).ToList(),
+                    Sizes = p.ProductSizes.Select(ps => ps.Size!.Name).ToList()
+                })
+                .ToListAsync();
 
-                cachedProducts = await _context.Products
-                    .Include(p => p.Category)
-                    .Include(p => p.Images)
-                    .Include(p => p.ProductSizes).ThenInclude(ps => ps.Size)
-                    .Select(p => new ProductReadDto
-                    {
-                        Id = p.Id,
-                        Name = p.Name,
-                        Description = p.Description,
-                        Price = p.Price,
-                        CategoryName = p.Category != null ? p.Category.Name : "General",
-                        ImageUrls = p.Images.Select(img =>
-                            $"{baseUrl}/images/{img.ImageUrl.Replace("images/", "").TrimStart('/')}"
-                        ).ToList(),
-                        Sizes = p.ProductSizes.Select(ps => ps.Size!.Name).ToList()
-                    })
-                    .ToListAsync();
-
-                var cacheOptions = new MemoryCacheEntryOptions()
-                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(30)) 
-                    .SetSlidingExpiration(TimeSpan.FromMinutes(10)) 
-                    .SetPriority(CacheItemPriority.Normal);
-
-                _cache.Set(cacheKey, cachedProducts, cacheOptions);
-            }
-
-            return cachedProducts!;
+            return products;
         }
 
         public async Task<IEnumerable<ProductReadDto>> GetProductByCategory(int? categoryId)
@@ -267,6 +257,50 @@ namespace Marketify.Services
                     $"{baseUrl}/images/{img.ImageUrl.Replace("images/", "").TrimStart('/')}"
                 ).ToList()
             }).ToListAsync();
+        }
+
+        public async Task<IEnumerable<ProductReadDto>> GetAllProductsCaching()
+        {
+            const string cacheKey = "all_products";
+
+            if (_memoryCache.TryGetValue(cacheKey, out IEnumerable<ProductReadDto> cachedProducts))
+            {
+                return cachedProducts!;
+            }
+
+            var request = _httpContextAccessor.HttpContext?.Request;
+            var baseUrl = $"{request?.Scheme}://{request?.Host}";
+
+            var products = await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Images)
+                .Include(p => p.ProductSizes)
+                    .ThenInclude(ps => ps.Size)
+                .Select(p => new ProductReadDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    CategoryName = p.Category != null ? p.Category.Name : "General",
+
+                    ImageUrls = p.Images.Select(img =>
+                        $"{baseUrl}/images/{img.ImageUrl.Replace("images/", "").TrimStart('/')}"
+                    ).ToList(),
+
+                    Sizes = p.ProductSizes
+                        .Select(ps => ps.Size!.Name)
+                        .ToList()
+                })
+                .ToListAsync();
+
+            var cacheOptions = new MemoryCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromMinutes(10))
+                .SetSlidingExpiration(TimeSpan.FromMinutes(2));
+
+            _memoryCache.Set(cacheKey, products, cacheOptions);
+
+            return products;
         }
     }
 }

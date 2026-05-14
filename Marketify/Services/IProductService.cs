@@ -13,7 +13,6 @@ namespace Marketify.Services
         public Task<IEnumerable<ProductReadDto>> GetProductByCategory(int?  categoryId);
 
         public  Task<IEnumerable<ProductReadDto>> SearchProductsAsync(string searchTerm);
-        //Task<bool> AddReviewAsync(string userId, CreateReviewDto reviewDto);
-        //Task<IEnumerable<ReviewDto>> GetProductReviewsAsync(int productId);
+        public  Task<IEnumerable<ProductReadDto>> GetAllProductsCaching();
     }
 }

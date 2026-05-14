@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace Marketify.Controllers
@@ -15,10 +16,12 @@ namespace Marketify.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductService _productService;
+        private readonly ILogger<ProductController> _logger;
 
-        public ProductController(IProductService productService)
+        public ProductController(IProductService productService,ILogger<ProductController>logger)
         {
             _productService = productService;
+            _logger = logger;
         }
         [HttpGet("test-claims")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -35,8 +38,7 @@ namespace Marketify.Controllers
             });
         }
         [HttpPost]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
-            Roles =AppRoles.SuperAdmin)]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles =AppRoles.SuperAdmin)]
         [Consumes("multipart/form-data")] 
         public async Task<IActionResult> Create([FromForm] CreateProduct request)
         {
@@ -81,18 +83,26 @@ namespace Marketify.Controllers
             }
         }
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> DeleteProduct([FromRoute]int id)
+        public async Task<IActionResult> DeleteProduct([FromRoute] int id)
         {
             if (id == 0) return BadRequest("id is 0");
-          
-            var IsDeleted =await  _productService.DeleteProductAsync(id);
-            if(IsDeleted )
-            {
-            return Ok();
-            }
-                return BadRequest("SomeThins Wrong Error");
-        }
 
+            try
+            {
+                var isDeleted = await _productService.DeleteProductAsync(id);
+
+                if (isDeleted)
+                {
+                    return Ok(); 
+                }
+
+                return NotFound("Product not found in the database. It might have been already deleted.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Failed to delete product. It might be linked to other records. Error: {ex.InnerException?.Message ?? ex.Message}");
+            }
+        }
         [HttpGet("{Id}")]
        public async Task<IActionResult>GetById([FromRoute]int Id)
         {
@@ -102,10 +112,13 @@ namespace Marketify.Controllers
         }
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductReadDto>>> GetProducts()
+
         {
+            _logger.LogWarning("Low stock for product");
             var products = await _productService.GetAllProductsAsync();
             return Ok(products);
         }
+
         [HttpGet("GetProductsByCatID/{Id:int}")]
         public async Task<ActionResult<IEnumerable<ProductReadDto>>> GetAllProductBycateId([FromRoute] int Id)
         {
@@ -117,6 +130,19 @@ namespace Marketify.Controllers
         {
             var results = await _productService.SearchProductsAsync(query);
             return Ok(results);
+        }
+        [HttpGet("Test-Rate")]
+        [EnableRateLimiting("concurrency")]
+        public async Task<IActionResult>Testt()
+        {
+            Thread.Sleep(6000);
+            return Ok();
+        }
+        [HttpGet("ProductWithCaching")]
+        public async Task <IActionResult>GetAll()
+        {
+            var products  = await _productService.GetAllProductsCaching();
+            return Ok(products);    
         }
     }
 

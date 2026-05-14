@@ -9,6 +9,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
+		<PackageReference Include="Hangfire.AspNetCore" Version="1.8.23" />
+		<PackageReference Include="Hangfire.SqlServer" Version="1.8.23" />
 		<PackageReference Include="MailKit" Version="4.15.1" />
 		<PackageReference Include="Mapster" Version="9.0.0-pre01" />
 		<PackageReference Include="Mapster.DependencyInjection" Version="9.0.0-pre01" />
@@ -26,6 +28,10 @@
 		</PackageReference>
 
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+
+		<PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+
+		<PackageReference Include="Serilog.Sinks.File" Version="8.0.0-nblumhardt-02322" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
 	</ItemGroup>
 

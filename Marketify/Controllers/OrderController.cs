@@ -1,9 +1,11 @@
-﻿using Marketify.Contracts.Order;
+﻿
+using Marketify.Contracts.Order;
 using Marketify.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using System.Security.Claims;
 
 namespace Marketify.Controllers
@@ -11,9 +13,11 @@ namespace Marketify.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
-    public class OrderController(IOrderService orderService) : ControllerBase
+    public class OrderController(IOrderService orderService,IMemoryCache memoryCache) : ControllerBase
     {
         private readonly IOrderService _orderService = orderService;
+        private readonly IMemoryCache _memoryCache = memoryCache;
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 
         [HttpPost("checkout")]
         public async Task<IActionResult> Checkout(CheckoutRequest request)
@@ -48,6 +52,21 @@ namespace Marketify.Controllers
             if (order == null) return NotFound("Order not found.");
 
             return Ok(order);
+        }
+        [HttpPost("Idemoptency")]
+        public IActionResult DoAction([FromHeader(Name = "Idempotency-Key")] string key)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+                return BadRequest("Key is required");
+
+            if (_memoryCache.TryGetValue(key, out _))
+                return Ok("Already done");
+
+          
+
+            _memoryCache.Set(key, true, TimeSpan.FromMinutes(5));
+
+            return Ok("Done successfully");
         }
     }
 }
